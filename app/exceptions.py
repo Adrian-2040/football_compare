@@ -9,4 +9,4 @@ class PlayerNotFoundError(LookupError):
     """Pilkarza o podanym id nie ma w bazie."""
 
     def __init__(self, player_id):
-        super().__init__(f"Player with id {player_id} was not found")
+        super().__init__(f"Nie znaleziono piłkarza o id {player_id}")

@@ -1,72 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Football Stats Comparison</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Porównywarka statystyk piłkarzy</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; }
-        select, button { padding: 6px; margin-right: 8px; }
-        table { border-collapse: collapse; margin-top: 20px; width: 100%; }
-        th, td { border: 1px solid #999; padding: 8px; text-align: center; }
-        th { background: #eee; }
-        .error { color: #b00020; margin-top: 15px; font-weight: bold; }
+        /* Zmienne CSS: kolory zapisane w jednym miejscu, latwo je zmienic */
+        :root {
+            --green-dark: #0b3d2e;
+            --green-main: #1b8a5a;
+            --green-light: #e8f5ee;
+            --gold: #f4c430;
+            --text: #1d2b25;
+            --positive: #1b8a5a;
+            --negative: #c0392b;
+            --neutral: #7f8c8d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+            background: linear-gradient(160deg, var(--green-dark), var(--green-main));
+            min-height: 100vh;
+            padding: 30px 15px;
+        }
+
+        .card {
+            max-width: 760px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--green-dark);
+            color: #ffffff;
+            text-align: center;
+            padding: 25px 20px;
+            border-bottom: 5px solid var(--gold);
+        }
+
+        header h1 { margin: 0; font-size: 28px; }
+        header p { margin: 8px 0 0; opacity: 0.8; }
+
+        .content { padding: 25px; }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        select {
+            flex: 1 1 200px;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid var(--green-main);
+            border-radius: 8px;
+            background: var(--green-light);
+        }
+
+        button {
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            background: var(--green-main);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: var(--green-dark); }
+
+        .error {
+            margin-top: 20px;
+            padding: 12px;
+            background: #fdecea;
+            color: var(--negative);
+            border-left: 5px solid var(--negative);
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: var(--green-main);
+            color: #ffffff;
+            padding: 12px;
+        }
+
+        th small { display: block; font-weight: normal; opacity: 0.85; }
+
+        td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #dde7e1;
+        }
+
+        td.label { text-align: left; font-weight: bold; }
+
+        tr:nth-child(even) td { background: var(--green-light); }
+
+        td.better { color: var(--positive); font-weight: bold; }
+        td.positive { color: var(--positive); font-weight: bold; }
+        td.negative { color: var(--negative); font-weight: bold; }
+        td.neutral  { color: var(--neutral); font-weight: bold; }
+
+        .hint { margin-top: 15px; font-size: 13px; color: var(--neutral); text-align: center; }
     </style>
 </head>
 <body>
-<h1>Football Stats Comparison</h1>
 
-<!-- Formularz wysyla wybrane id pilkarzy na adres /compare -->
-<form action="/compare" method="get">
-    <select name="first_id">
-        <option value="">-- first player --</option>
-        {% for player in players %}
-        <option value="{{ player.id }}">{{ player.name }}</option>
-        {% endfor %}
-    </select>
+{# Makro to "funkcja" w szablonie. Zwraca nazwe klasy CSS zaleznie od znaku liczby #}
+{% macro diff_class(value) -%}
+    {%- if value > 0 -%}positive{%- elif value < 0 -%}negative{%- else -%}neutral{%- endif -%}
+{%- endmacro %}
 
-    <select name="second_id">
-        <option value="">-- second player --</option>
-        {% for player in players %}
-        <option value="{{ player.id }}">{{ player.name }}</option>
-        {% endfor %}
-    </select>
+<div class="card">
+    <header>
+        <h1>&#9917; Porównywarka statystyk piłkarzy</h1>
+        <p>Wybierz dwóch zawodników i porównaj ich statystyki</p>
+    </header>
 
-    <button type="submit">Compare</button>
-</form>
+    <div class="content">
+        <!-- Formularz wysyla wybrane id pilkarzy na adres /compare -->
+        <form action="/compare" method="get">
+            <select name="first_id">
+                <option value="">-- pierwszy piłkarz --</option>
+                {% for player in players %}
+                <option value="{{ player.id }}"
+                        {% if comparison and comparison.first.id == player.id %}selected{% endif %}>
+                    {{ player.name }}
+                </option>
+                {% endfor %}
+            </select>
 
-<!-- Komunikat o bledzie pokazuje sie tylko, gdy istnieje -->
-{% if error_message %}
-<p class="error">{{ error_message }}</p>
-{% endif %}
+            <select name="second_id">
+                <option value="">-- drugi piłkarz --</option>
+                {% for player in players %}
+                <option value="{{ player.id }}"
+                        {% if comparison and comparison.second.id == player.id %}selected{% endif %}>
+                    {{ player.name }}
+                </option>
+                {% endfor %}
+            </select>
 
-<!-- Tabela pokazuje sie tylko, gdy jest wynik porownania -->
-{% if comparison %}
-<table>
-    <tr>
-        <th>Statistic</th>
-        <th>{{ comparison.first.name }}</th>
-        <th>{{ comparison.second.name }}</th>
-        <th>Difference</th>
-    </tr>
-    <tr>
-        <td>Appearances</td>
-        <td>{{ comparison.first.appearances }}</td>
-        <td>{{ comparison.second.appearances }}</td>
-        <td>{{ comparison.appearances_difference }}</td>
-    </tr>
-    <tr>
-        <td>Goals</td>
-        <td>{{ comparison.first.goals }}</td>
-        <td>{{ comparison.second.goals }}</td>
-        <td>{{ comparison.goals_difference }}</td>
-    </tr>
-    <tr>
-        <td>Assists</td>
-        <td>{{ comparison.first.assists }}</td>
-        <td>{{ comparison.second.assists }}</td>
-        <td>{{ comparison.assists_difference }}</td>
-    </tr>
-</table>
-{% endif %}
+            <button type="submit">Porównaj</button>
+        </form>
+
+        <!-- Komunikat o bledzie pokazuje sie tylko, gdy istnieje -->
+        {% if error_message %}
+        <div class="error">{{ error_message }}</div>
+        {% endif %}
+
+        <!-- Tabela pokazuje sie tylko, gdy jest wynik porownania -->
+        {% if comparison %}
+        <table>
+            <tr>
+                <th>Statystyka</th>
+                <th>{{ comparison.first.name }}
+                    <small>{{ comparison.first.club }} | {{ comparison.first.position }}</small></th>
+                <th>{{ comparison.second.name }}
+                    <small>{{ comparison.second.club }} | {{ comparison.second.position }}</small></th>
+                <th>Różnica</th>
+            </tr>
+            <tr>
+                <td class="label">Występy</td>
+                <td class="{{ 'better' if comparison.appearances_difference > 0 }}">{{ comparison.first.appearances }}</td>
+                <td class="{{ 'better' if comparison.appearances_difference < 0 }}">{{ comparison.second.appearances }}</td>
+                <td class="{{ diff_class(comparison.appearances_difference) }}">{{ '%+d'|format(comparison.appearances_difference) }}</td>
+            </tr>
+            <tr>
+                <td class="label">Gole</td>
+                <td class="{{ 'better' if comparison.goals_difference > 0 }}">{{ comparison.first.goals }}</td>
+                <td class="{{ 'better' if comparison.goals_difference < 0 }}">{{ comparison.second.goals }}</td>
+                <td class="{{ diff_class(comparison.goals_difference) }}">{{ '%+d'|format(comparison.goals_difference) }}</td>
+            </tr>
+            <tr>
+                <td class="label">Asysty</td>
+                <td class="{{ 'better' if comparison.assists_difference > 0 }}">{{ comparison.first.assists }}</td>
+                <td class="{{ 'better' if comparison.assists_difference < 0 }}">{{ comparison.second.assists }}</td>
+                <td class="{{ diff_class(comparison.assists_difference) }}">{{ '%+d'|format(comparison.assists_difference) }}</td>
+            </tr>
+        </table>
+        <p class="hint">Różnica = pierwszy piłkarz minus drugi. Zielony kolor oznacza wyższą wartość.</p>
+        {% endif %}
+    </div>
+</div>
+
 </body>
 </html>

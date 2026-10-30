@@ -25,9 +25,9 @@ class ComparisonService:
     def _validate_ids(first_id, second_id):
         # Sprawdza, czy uzytkownik wybral dwoch roznych pilkarzy
         if first_id is None or second_id is None:
-            raise InvalidSelectionError("Select both players")
+            raise InvalidSelectionError("Wybierz obu piłkarzy")
         if first_id == second_id:
-            raise InvalidSelectionError("Select two different players")
+            raise InvalidSelectionError("Wybierz dwóch różnych piłkarzy")
 
     def _find_player(self, player_id):
         player = self._repository.get_by_id(player_id)
