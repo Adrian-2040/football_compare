@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Football Stats Comparison</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; }
+        select, button { padding: 6px; margin-right: 8px; }
+        table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+        th, td { border: 1px solid #999; padding: 8px; text-align: center; }
+        th { background: #eee; }
+        .error { color: #b00020; margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+<h1>Football Stats Comparison</h1>
+
+<!-- Formularz wysyla wybrane id pilkarzy na adres /compare -->
+<form action="/compare" method="get">
+    <select name="first_id">
+        <option value="">-- first player --</option>
+        {% for player in players %}
+        <option value="{{ player.id }}">{{ player.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="second_id">
+        <option value="">-- second player --</option>
+        {% for player in players %}
+        <option value="{{ player.id }}">{{ player.name }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Compare</button>
+</form>
+
+<!-- Komunikat o bledzie pokazuje sie tylko, gdy istnieje -->
+{% if error_message %}
+<p class="error">{{ error_message }}</p>
+{% endif %}
+
+<!-- Tabela pokazuje sie tylko, gdy jest wynik porownania -->
+{% if comparison %}
+<table>
+    <tr>
+        <th>Statistic</th>
+        <th>{{ comparison.first.name }}</th>
+        <th>{{ comparison.second.name }}</th>
+        <th>Difference</th>
+    </tr>
+    <tr>
+        <td>Appearances</td>
+        <td>{{ comparison.first.appearances }}</td>
+        <td>{{ comparison.second.appearances }}</td>
+        <td>{{ comparison.appearances_difference }}</td>
+    </tr>
+    <tr>
+        <td>Goals</td>
+        <td>{{ comparison.first.goals }}</td>
+        <td>{{ comparison.second.goals }}</td>
+        <td>{{ comparison.goals_difference }}</td>
+    </tr>
+    <tr>
+        <td>Assists</td>
+        <td>{{ comparison.first.assists }}</td>
+        <td>{{ comparison.second.assists }}</td>
+        <td>{{ comparison.assists_difference }}</td>
+    </tr>
+</table>
+{% endif %}
+</body>
+</html>
