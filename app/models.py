@@ -1,24 +1,49 @@
-from dataclasses import dataclass
+"""
+models.py (modele)
+
+Tu są klasy, które tylko trzymają dane.
+Player - jeden piłkarz.
+StatsComparison - wynik porównania dwóch piłkarzy.
+Metoda to_dict zamienia obiekt na słownik, żeby API mogło go wysłać jako JSON.
+"""
 
 
-# @dataclass sam tworzy konstruktor i inne metody, wiec klasa to tylko "pojemnik na dane".
-# frozen=True oznacza, ze po utworzeniu obiektu nie mozna zmienic jego pol.
-@dataclass(frozen=True)
 class Player:
-    id: int
-    name: str
-    club: str
-    position: str
-    appearances: int
-    goals: int
-    assists: int
+    def __init__(self, id, name, club, position, appearances, goals, assists):
+        self.id = id
+        self.name = name
+        self.club = club
+        self.position = position
+        self.appearances = appearances
+        self.goals = goals
+        self.assists = assists
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "club": self.club,
+            "position": self.position,
+            "appearances": self.appearances,
+            "goals": self.goals,
+            "assists": self.assists,
+        }
 
 
-# Wynik porownania. Roznica = statystyka pierwszego minus statystyka drugiego.
-@dataclass(frozen=True)
 class StatsComparison:
-    first: Player
-    second: Player
-    appearances_difference: int
-    goals_difference: int
-    assists_difference: int
+    def __init__(self, first, second, appearances_difference,
+                 goals_difference, assists_difference):
+        self.first = first
+        self.second = second
+        self.appearances_difference = appearances_difference
+        self.goals_difference = goals_difference
+        self.assists_difference = assists_difference
+
+    def to_dict(self):
+        return {
+            "first": self.first.to_dict(),
+            "second": self.second.to_dict(),
+            "appearances_difference": self.appearances_difference,
+            "goals_difference": self.goals_difference,
+            "assists_difference": self.assists_difference,
+        }

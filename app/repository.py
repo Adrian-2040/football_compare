@@ -1,38 +1,35 @@
-from contextlib import closing
+"""
+repository.py (repozytorium)
+Tylko ten plik pyta bazę danych o piłkarzy.
+"""
 
-from app.database import get_connection
+import sqlite3
+
 from app.models import Player
 
 
 class PlayerRepository:
-    """Jedyne miejsce, ktore rozmawia z baza. Reszta aplikacji nie zna SQL-a."""
-
     def __init__(self, database_path):
-        self._database_path = database_path
+        self.database_path = database_path
 
     def get_all(self):
-        with closing(get_connection(self._database_path)) as connection:
-            rows = connection.execute("SELECT * FROM players ORDER BY name").fetchall()
-        return [self._row_to_player(row) for row in rows]
+        connection = sqlite3.connect(self.database_path)
+        rows = connection.execute("SELECT * FROM players ORDER BY name").fetchall()
+        connection.close()
+
+        players = []
+        for row in rows:
+            player = Player(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+            players.append(player)
+        return players
 
     def get_by_id(self, player_id):
-        with closing(get_connection(self._database_path)) as connection:
-            row = connection.execute(
-                "SELECT * FROM players WHERE id = ?", (player_id,)
-            ).fetchone()
+        connection = sqlite3.connect(self.database_path)
+        row = connection.execute(
+            "SELECT * FROM players WHERE id = ?", (player_id,)
+        ).fetchone()
+        connection.close()
+
         if row is None:
             return None
-        return self._row_to_player(row)
-
-    @staticmethod
-    def _row_to_player(row):
-        # Zamienia wiersz z bazy na obiekt Player
-        return Player(
-            id=row["id"],
-            name=row["name"],
-            club=row["club"],
-            position=row["position"],
-            appearances=row["appearances"],
-            goals=row["goals"],
-            assists=row["assists"],
-        )
+        return Player(row[0], row[1], row[2], row[3], row[4], row[5], row[6])

@@ -1,12 +1,14 @@
-# Wlasne bledy aplikacji. Dzieki nim wiadomo, CO poszlo nie tak.
+"""
+exceptions.py (wyjątki)
+Tu są nasze własne błędy.
+InvalidSelectionError - użytkownik źle wybrał piłkarzy.
+PlayerNotFoundError - piłkarza nie ma w bazie.
+"""
 
 
-class InvalidSelectionError(ValueError):
-    """Uzytkownik wybral zle dane (brak pilkarza albo ten sam dwa razy)."""
+class InvalidSelectionError(Exception):
+    pass
 
 
-class PlayerNotFoundError(LookupError):
-    """Pilkarza o podanym id nie ma w bazie."""
-
-    def __init__(self, player_id):
-        super().__init__(f"Nie znaleziono piłkarza o id {player_id}")
+class PlayerNotFoundError(Exception):
+    pass

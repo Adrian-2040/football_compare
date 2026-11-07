@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Porównywarka statystyk piłkarzy</title>
     <style>
-        /* Zmienne CSS: kolory zapisane w jednym miejscu, latwo je zmienic */
         :root {
             --green-dark: #0b3d2e;
             --green-main: #1b8a5a;
@@ -126,11 +125,6 @@
 </head>
 <body>
 
-{# Makro to "funkcja" w szablonie. Zwraca nazwe klasy CSS zaleznie od znaku liczby #}
-{% macro diff_class(value) -%}
-    {%- if value > 0 -%}positive{%- elif value < 0 -%}negative{%- else -%}neutral{%- endif -%}
-{%- endmacro %}
-
 <div class="card">
     <header>
         <h1>&#9917; Porównywarka statystyk piłkarzy</h1>
@@ -138,7 +132,7 @@
     </header>
 
     <div class="content">
-        <!-- Formularz wysyla wybrane id pilkarzy na adres /compare -->
+        <!-- Formularz wysyła wybrane id piłkarzy na adres /compare -->
         <form action="/compare" method="get">
             <select name="first_id">
                 <option value="">-- pierwszy piłkarz --</option>
@@ -163,13 +157,13 @@
             <button type="submit">Porównaj</button>
         </form>
 
-        <!-- Komunikat o bledzie pokazuje sie tylko, gdy istnieje -->
+        <!-- Komunikat o błędzie pokazuje się tylko, gdy jest błąd -->
         {% if error_message %}
         <div class="error">{{ error_message }}</div>
         {% endif %}
 
-        <!-- Tabela pokazuje sie tylko, gdy jest wynik porownania -->
-        {% if comparison %}
+        <!-- Tabela pokazuje się tylko, gdy jest wynik porównania -->
+                {% if comparison %}
         <table>
             <tr>
                 <th>Statystyka</th>
@@ -181,21 +175,21 @@
             </tr>
             <tr>
                 <td class="label">Występy</td>
-                <td class="{{ 'better' if comparison.appearances_difference > 0 }}">{{ comparison.first.appearances }}</td>
-                <td class="{{ 'better' if comparison.appearances_difference < 0 }}">{{ comparison.second.appearances }}</td>
-                <td class="{{ diff_class(comparison.appearances_difference) }}">{{ '%+d'|format(comparison.appearances_difference) }}</td>
+                <td {% if comparison.appearances_difference > 0 %}class="better"{% endif %}>{{ comparison.first.appearances }}</td>
+                <td {% if comparison.appearances_difference < 0 %}class="better"{% endif %}>{{ comparison.second.appearances }}</td>
+                <td {% if comparison.appearances_difference > 0 %}class="positive"{% elif comparison.appearances_difference < 0 %}class="negative"{% else %}class="neutral"{% endif %}>{{ comparison.appearances_difference }}</td>
             </tr>
             <tr>
                 <td class="label">Gole</td>
-                <td class="{{ 'better' if comparison.goals_difference > 0 }}">{{ comparison.first.goals }}</td>
-                <td class="{{ 'better' if comparison.goals_difference < 0 }}">{{ comparison.second.goals }}</td>
-                <td class="{{ diff_class(comparison.goals_difference) }}">{{ '%+d'|format(comparison.goals_difference) }}</td>
+                <td {% if comparison.goals_difference > 0 %}class="better"{% endif %}>{{ comparison.first.goals }}</td>
+                <td {% if comparison.goals_difference < 0 %}class="better"{% endif %}>{{ comparison.second.goals }}</td>
+                <td {% if comparison.goals_difference > 0 %}class="positive"{% elif comparison.goals_difference < 0 %}class="negative"{% else %}class="neutral"{% endif %}>{{ comparison.goals_difference }}</td>
             </tr>
             <tr>
                 <td class="label">Asysty</td>
-                <td class="{{ 'better' if comparison.assists_difference > 0 }}">{{ comparison.first.assists }}</td>
-                <td class="{{ 'better' if comparison.assists_difference < 0 }}">{{ comparison.second.assists }}</td>
-                <td class="{{ diff_class(comparison.assists_difference) }}">{{ '%+d'|format(comparison.assists_difference) }}</td>
+                <td {% if comparison.assists_difference > 0 %}class="better"{% endif %}>{{ comparison.first.assists }}</td>
+                <td {% if comparison.assists_difference < 0 %}class="better"{% endif %}>{{ comparison.second.assists }}</td>
+                <td {% if comparison.assists_difference > 0 %}class="positive"{% elif comparison.assists_difference < 0 %}class="negative"{% else %}class="neutral"{% endif %}>{{ comparison.assists_difference }}</td>
             </tr>
         </table>
         <p class="hint">Różnica = pierwszy piłkarz minus drugi. Zielony kolor oznacza wyższą wartość.</p>
